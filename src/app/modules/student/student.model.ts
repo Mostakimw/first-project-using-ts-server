@@ -8,6 +8,8 @@ import {
   StudentModel,
   TUserName,
 } from './student.interface';
+import config from '../../config';
+import bcrypt from 'bcrypt';
 
 //! Create schema for username
 const userNameSchema = new Schema<TUserName>({
@@ -202,60 +204,114 @@ const localGuardianSchema = new Schema<TLocalGuardian>({
 //?---------------------------------------------
 
 //! custom static methods start
-const studentSchema = new Schema<TStudent, StudentModel>({
-  id: {
-    type: String,
-    required: [true, 'Student ID is required'],
-    unique: true,
-  },
-  name: {
-    type: userNameSchema,
-    required: [true, 'Student name is required'],
-  },
-  // ! Enum declaration
-  gender: {
-    type: String,
-    enum: {
-      values: ['male', 'female', 'other'],
-      // Getting user input value
-      message: '{VALUE} is not valid',
+const studentSchema = new Schema<TStudent, StudentModel>(
+  {
+    id: {
+      type: String,
+      required: [true, 'Student ID is required'],
+      unique: true,
     },
-    required: [true, 'Gender is required'],
+    password: {
+      type: String,
+      required: [true, 'Password is required'],
+      maxlength: [20, 'Password can be more than 20 characters'],
+    },
+    name: {
+      type: userNameSchema,
+      required: [true, 'Student name is required'],
+    },
+    // ! Enum declaration
+    gender: {
+      type: String,
+      enum: {
+        values: ['male', 'female', 'other'],
+        // Getting user input value
+        message: '{VALUE} is not valid',
+      },
+      required: [true, 'Gender is required'],
+    },
+    dateOfBirth: { type: String },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+    },
+    contactNo: { type: String, required: [true, 'Contact number is required'] },
+    emergencyContactNo: {
+      type: String,
+      required: [true, 'Emergency contact number is required'],
+    },
+    bloodGroup: {
+      type: String,
+      enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+      required: [true, 'Blood group is required'],
+    },
+    presentAddress: {
+      type: String,
+      required: [true, 'Present address is required'],
+    },
+    permanentAddress: {
+      type: String,
+      required: [true, 'Permanent address is required'],
+    },
+    guardian: {
+      type: guardianSchema,
+      required: [true, 'Guardian information is required'],
+    },
+    localGuardian: {
+      type: localGuardianSchema,
+      required: [true, 'Local guardian information is required'],
+    },
+    profileImg: { type: String },
+    isActive: {
+      type: String,
+      enum: ['active', 'blocked'],
+      default: 'active',
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-  dateOfBirth: { type: String },
-  email: { type: String, required: [true, 'Email is required'], unique: true },
-  contactNo: { type: String, required: [true, 'Contact number is required'] },
-  emergencyContactNo: {
-    type: String,
-    required: [true, 'Emergency contact number is required'],
+  {
+    toJSON: {
+      virtuals: true,
+    },
   },
-  bloodGroup: {
-    type: String,
-    enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
-    required: [true, 'Blood group is required'],
-  },
-  presentAddress: {
-    type: String,
-    required: [true, 'Present address is required'],
-  },
-  permanentAddress: {
-    type: String,
-    required: [true, 'Permanent address is required'],
-  },
-  guardian: {
-    type: guardianSchema,
-    required: [true, 'Guardian information is required'],
-  },
-  localGuardian: {
-    type: localGuardianSchema,
-    required: [true, 'Local guardian information is required'],
-  },
-  profileImg: { type: String },
-  isActive: {
-    type: String,
-    enum: ['active', 'blocked'],
-    default: 'active',
-  },
+);
+
+//? create pre middleware/hook
+studentSchema.pre('save', async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds),
+  );
+  next();
+});
+
+//? create post middleware/hook
+studentSchema.post('save', function (doc, next) {
+  doc.password = '';
+  next();
+});
+
+//! query middleware find
+studentSchema.pre('find', function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+//! aggregate middleware
+// studentSchema.pre('aggregate', function (next) {
+//   this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+//   next();
+// });
+
+//! create virtuals
+studentSchema.virtual('fullName').get(function () {
+  return `${this.name.firstName} ${this.name.middleName}`;
 });
 
 //? create custom static methods

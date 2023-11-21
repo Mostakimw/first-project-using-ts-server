@@ -32,12 +32,20 @@ const createStudentIntoDB = async (studentData: TStudent) => {
   //! custom static methods end
 };
 
+//! get all students from db
 const getAllStudentsFromDB = async () => {
   const result = await Student.find();
+  return result;
+};
+
+//! delete student from db
+const deleteStudentFromDB = async (id: string) => {
+  const result = await Student.updateOne({ id }, { isDeleted: true });
   return result;
 };
 
 export const StudentServices = {
   createStudentIntoDB,
   getAllStudentsFromDB,
+  deleteStudentFromDB,
 };
