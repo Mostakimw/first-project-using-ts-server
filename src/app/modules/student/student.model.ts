@@ -8,8 +8,6 @@ import {
   StudentModel,
   TUserName,
 } from './student.interface';
-import config from '../../config';
-import bcrypt from 'bcrypt';
 
 //! Create schema for username
 const userNameSchema = new Schema<TUserName>({
@@ -217,11 +215,6 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       unique: true,
       ref: 'User',
     },
-    password: {
-      type: String,
-      required: [true, 'Password is required'],
-      maxlength: [20, 'Password can be more than 20 characters'],
-    },
     name: {
       type: userNameSchema,
       required: [true, 'Student name is required'],
@@ -280,23 +273,6 @@ const studentSchema = new Schema<TStudent, StudentModel>(
     },
   },
 );
-
-//? create pre middleware/hook
-studentSchema.pre('save', async function (next) {
-  // eslint-disable-next-line @typescript-eslint/no-this-alias
-  const user = this;
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_rounds),
-  );
-  next();
-});
-
-//? create post middleware/hook
-studentSchema.post('save', function (doc, next) {
-  doc.password = '';
-  next();
-});
 
 //! query middleware find
 studentSchema.pre('find', function (next) {

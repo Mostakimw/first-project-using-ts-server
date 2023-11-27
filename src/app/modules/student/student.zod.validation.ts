@@ -32,7 +32,6 @@ const LocalGuardianSchemaZod = z.object({
 // Zod schema for Student
 const StudentSchemaZod = z.object({
   id: z.string(),
-  password: z.string().max(20),
   name: UserNameSchemaZod,
   gender: z.enum(['male', 'female', 'other']),
   dateOfBirth: z.string(),
