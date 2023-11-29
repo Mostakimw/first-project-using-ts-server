@@ -6,31 +6,36 @@ import {
   AcademicSemesterName,
 } from './academicSemester.constant';
 
-export const academicSemesterSchema = new Schema<TAcademicSemester>({
-  name: {
-    type: String,
-    enum: AcademicSemesterName,
-    required: true,
-  },
-  year: {
-    type: Date,
-    required: true,
-  },
-  code: {
-    type: String,
-    enum: AcademicSemesterCode,
-    required: true,
-  },
+export const academicSemesterSchema = new Schema<TAcademicSemester>(
+  {
+    name: {
+      type: String,
+      enum: AcademicSemesterName,
+      required: true,
+    },
+    year: {
+      type: String,
+      required: true,
+    },
+    code: {
+      type: String,
+      enum: AcademicSemesterCode,
+      required: true,
+    },
 
-  startMonth: {
-    type: String,
-    enum: AcademicSemesterMonths,
+    startMonth: {
+      type: String,
+      enum: AcademicSemesterMonths,
+    },
+    endMonth: {
+      type: String,
+      enum: AcademicSemesterMonths,
+    },
   },
-  endMonth: {
-    type: String,
-    enum: AcademicSemesterMonths,
+  {
+    timestamps: true,
   },
-});
+);
 
 export const AcademicSemester = model<TAcademicSemester>(
   'AcademicSemester',
