@@ -37,6 +37,19 @@ export const academicSemesterSchema = new Schema<TAcademicSemester>(
   },
 );
 
+//! hook for checking if user try to admission multiple time in a semester at same year
+academicSemesterSchema.pre('save', async function (next) {
+  const isSemesterExists = await AcademicSemester.findOne({
+    year: this.year,
+    name: this.name,
+  });
+  console.log(isSemesterExists);
+  if (isSemesterExists) {
+    throw new Error('Semester is already exists');
+  }
+  next();
+});
+
 export const AcademicSemester = model<TAcademicSemester>(
   'AcademicSemester',
   academicSemesterSchema,
