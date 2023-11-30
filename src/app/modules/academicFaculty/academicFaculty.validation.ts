@@ -1,13 +1,17 @@
 import { z } from 'zod';
 
 const createAcademicFacultyValidationSchema = z.object({
-  name: z.string({
-    invalid_type_error: 'Password must be a String',
+  body: z.object({
+    name: z.string({
+      invalid_type_error: 'Password must be a String',
+    }),
   }),
 });
 const updateAcademicFacultyValidationSchema = z.object({
-  name: z.string({
-    invalid_type_error: 'Password must be a String',
+  body: z.object({
+    name: z.string({
+      invalid_type_error: 'Password must be a String',
+    }),
   }),
 });
 
