@@ -34,13 +34,27 @@ import { Student } from './student.model';
 //! get all students from db
 
 const getAllStudentsFromDB = async () => {
-  const result = await Student.find();
+  const result = await Student.find()
+    .populate('academicSemester')
+    .populate({
+      path: 'academicDepartment',
+      populate: {
+        path: 'academicFaculty',
+      },
+    });
   return result;
 };
 
 //! single student
 const getSingleStudentFromDB = async (id: string) => {
-  const result = await Student.aggregate([{ $match: { id } }]);
+  const result = await Student.findById(id)
+    .populate('academicSemester')
+    .populate({
+      path: 'academicDepartment',
+      populate: {
+        path: 'academicFaculty',
+      },
+    });
   return result;
 };
 
